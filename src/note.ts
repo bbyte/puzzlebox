@@ -1,29 +1,14 @@
 /**
- * Note text obfuscation + the on-screen "unfolded paper" overlay.
- *
- * The text is XOR'd with a fixed key and base64-encoded so it isn't sitting in
- * the source as clear text. This is obfuscation, NOT security — anyone can
- * decode it; it just keeps the message out of plain view / search.
+ * The on-screen "unfolded paper" overlay. The note text is obfuscated (see
+ * `src/obfuscate.ts`) so it isn't clear text in the source.
  */
-const KEY = 'puzzlebox';
+import { obfuscate, deobfuscate } from './obfuscate';
 
-function xorBytes(bytes: Uint8Array): Uint8Array {
-  const out = new Uint8Array(bytes.length);
-  for (let i = 0; i < bytes.length; i++) out[i] = bytes[i] ^ KEY.charCodeAt(i % KEY.length);
-  return out;
-}
+/** Encode plain text → obfuscated string (use this to set CONFIG.note.encoded). */
+export const encodeNote = obfuscate;
 
-/** Encode plain text → obfuscated string (dev helper; see scripts/encode-note). */
-export function encodeNote(text: string): string {
-  const xored = xorBytes(new TextEncoder().encode(text));
-  return btoa(String.fromCharCode(...xored));
-}
-
-/** Decode an obfuscated string back to the original text. */
-export function decodeNote(encoded: string): string {
-  const bytes = Uint8Array.from(atob(encoded), (c) => c.charCodeAt(0));
-  return new TextDecoder().decode(xorBytes(bytes));
-}
+/** Decode an obfuscated note string back to the original text. */
+export const decodeNote = deobfuscate;
 
 export interface NoteOverlay {
   show(text: string): void;

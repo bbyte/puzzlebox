@@ -22,6 +22,7 @@ import {
 } from './game/mastermind';
 import { createBoxView, setLamp, type Interactive } from './scene/box';
 import { CONFIG } from './config';
+import { deobfuscate } from './obfuscate';
 import { createNoteOverlay, decodeNote } from './note';
 
 const canvas = document.getElementById('app') as HTMLCanvasElement;
@@ -205,12 +206,16 @@ function stopFlash(): void {
 }
 
 // --- Check / interaction ------------------------------------------------
+// Decoded once at startup (only when the debug master code is enabled).
+const MASTER_CODE: string[] = CONFIG.debug.masterCode.enabled
+  ? deobfuscate(CONFIG.debug.masterCode.encoded).split(',')
+  : [];
+
 function guessMatchesMaster(): boolean {
-  const m = CONFIG.debug.masterCode;
+  if (!CONFIG.debug.masterCode.enabled) return false;
   return (
-    m.enabled &&
-    state.guess.length === m.code.length &&
-    state.guess.every((g, i) => g === m.code[i])
+    state.guess.length === MASTER_CODE.length &&
+    state.guess.every((g, i) => g === MASTER_CODE[i])
   );
 }
 

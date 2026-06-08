@@ -175,12 +175,21 @@ npx vitest run src/game/mastermind.test.ts # a single file
 
 Edit [`src/config.ts`](src/config.ts):
 
-- `debug.masterCode` — when `enabled`, entering this exact code and pressing CHECK always opens the
-  box regardless of the secret (handy for testing the open animation). **Disable before shipping.**
-- `debug.revealSecret` — logs each round's secret code to the browser console.
-- `note.encoded` — the hidden note's message, stored obfuscated (XOR + base64) so it isn't clear
-  text in the source. To change it, run `encodeNote('your text')` from
-  [`src/note.ts`](src/note.ts) and paste the result.
+- `debug.masterCode` — when `enabled`, entering this code and pressing CHECK always opens the box
+  regardless of the secret (handy for testing the open animation). The code is stored **obfuscated**
+  in `encoded` (comma-joined color names); regenerate with `obfuscate('red,green,blue,white,magenta')`
+  from [`src/obfuscate.ts`](src/obfuscate.ts). Set `enabled: false` to disable it entirely.
+- `debug.revealSecret` — logs each round's secret to the browser console. **Leave this `false` when
+  sharing** — it reveals the answer to anyone with devtools open.
+- `note.encoded` — the hidden note's message, stored **obfuscated** (XOR + base64). To change it, run
+  `obfuscate('your text')` (or `encodeNote(...)` from [`src/note.ts`](src/note.ts)) and paste the
+  result.
+
+> **Heads-up on secrecy:** this is a static, client-only app — *everything* in `config.ts` ships to
+> the browser. Obfuscation (XOR + base64) only keeps values out of plain "view source" sight; it is
+> **not** security, and a determined user can always decode them. The per-round secret code itself is
+> generated at runtime (not stored in the source), but still lives in memory and is readable via
+> devtools. Treat the puzzle as casual fun, not a vault.
 
 ## Project layout
 

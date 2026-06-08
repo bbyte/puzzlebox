@@ -1,8 +1,10 @@
-import type { Color } from './game/mastermind';
-
 /**
- * App configuration. The `debug` block is for development only — flip
- * `masterCode.enabled` off before shipping.
+ * App configuration.
+ *
+ * Note: this all ships to the client (it's a static app), so nothing here is
+ * truly secret. Obfuscated values (XOR + base64) only keep things out of plain
+ * "view source" sight — they are not security. The `debug` block is for
+ * development; turn it off before sharing the puzzle for real.
  */
 export const CONFIG = {
   debug: {
@@ -10,13 +12,20 @@ export const CONFIG = {
      * Master code: when enabled, entering this exact code on the lights and
      * pressing Check always opens the box, regardless of the real secret.
      * Handy for testing the open animation without solving the puzzle.
+     *
+     * `encoded` is the comma-joined color names, obfuscated so the cheat code
+     * isn't clear text in the source. Regenerate with `obfuscate('a,b,c,d,e')`
+     * from src/obfuscate.ts. Set `enabled: false` to disable entirely.
      */
     masterCode: {
       enabled: true,
-      code: ['red', 'green', 'blue', 'white', 'magenta'] as Color[],
+      encoded: 'AhAeVgsXBwoWXBcWDwlJFQcRBBBWFw0CBwEMEQ==',
     },
-    /** Log the freshly generated secret to the console each round. */
-    revealSecret: true,
+    /**
+     * Log the freshly generated secret to the console each round. Leave this
+     * OFF when sharing — it reveals the answer to anyone with devtools open.
+     */
+    revealSecret: false,
   },
 
   note: {
