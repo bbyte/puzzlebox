@@ -18,7 +18,7 @@ export const CONFIG = {
      * from src/obfuscate.ts. Set `enabled: false` to disable entirely.
      */
     masterCode: {
-      enabled: true,
+      enabled: false,
       encoded: 'AhAeVgsXBwoWXBcWDwlJFQcRBBBWFw0CBwEMEQ==',
     },
     /**
