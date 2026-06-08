@@ -1,0 +1,174 @@
+:root {
+  color-scheme: dark;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  background: #1a1a1f;
+  /* Disable browser touch gestures so dragging rotates the box instead. */
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+#app {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* --- Note overlay ----------------------------------------------------- */
+.note-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6vmin;
+  background: rgba(0, 0, 0, 0);
+  opacity: 0;
+  pointer-events: none;
+  transition: background 0.4s ease, opacity 0.4s ease;
+  perspective: 1600px; /* 3D depth for the fold-open */
+  z-index: 10;
+}
+.note-backdrop.visible {
+  background: rgba(0, 0, 0, 0.72);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Aged, stained paper surface, shared by the sheet and its fold flaps. */
+.note-paper,
+.note-fold {
+  background-color: #c9b489;
+  background-image:
+    radial-gradient(ellipse at 18% 12%, rgba(90, 64, 28, 0.35), transparent 42%),
+    radial-gradient(ellipse at 82% 28%, rgba(70, 50, 22, 0.32), transparent 38%),
+    radial-gradient(ellipse at 30% 88%, rgba(60, 42, 18, 0.4), transparent 46%),
+    radial-gradient(ellipse at 70% 72%, rgba(80, 58, 26, 0.28), transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(173, 150, 104, 0.4), rgba(150, 124, 80, 0.65));
+}
+
+.note-paper {
+  position: relative;
+  box-sizing: border-box;
+  max-width: min(560px, 86vw);
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  padding: clamp(20px, 6vmin, 52px);
+  color: #2b2317;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: clamp(17px, 3.4vmin, 24px);
+  line-height: 1.5;
+  box-shadow:
+    0 22px 50px rgba(0, 0, 0, 0.6),
+    inset 0 0 60px rgba(60, 40, 16, 0.45);
+  border-radius: 3px;
+  transform: rotate(-1.4deg);
+  transform-style: preserve-3d;
+  /* Folded: only the middle third is visible. */
+  clip-path: inset(33.33% 0 33.33% 0);
+}
+.note-backdrop.visible .note-paper {
+  animation: sheet-unfold 0.95s ease forwards;
+}
+
+/* Top/bottom flaps that start folded over the middle band, then swing open. */
+.note-fold {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 33.34%;
+  pointer-events: none;
+  backface-visibility: hidden;
+  box-shadow: inset 0 0 30px rgba(60, 40, 16, 0.4);
+}
+.note-fold.top {
+  top: 0;
+  transform-origin: bottom center;
+  transform: rotateX(-180deg); /* folded down onto the middle */
+}
+.note-fold.bottom {
+  bottom: 0;
+  transform-origin: top center;
+  transform: rotateX(180deg); /* folded up onto the middle */
+}
+.note-backdrop.visible .note-fold.top {
+  animation: fold-open-top 0.95s ease forwards;
+}
+.note-backdrop.visible .note-fold.bottom {
+  animation: fold-open-bottom 0.95s ease forwards;
+}
+
+.note-text {
+  margin: 0;
+  white-space: pre-wrap;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.18);
+  opacity: 0;
+}
+.note-backdrop.visible .note-text {
+  animation: note-ink-in 0.95s ease forwards;
+}
+
+@keyframes sheet-unfold {
+  0%,
+  12% {
+    clip-path: inset(33.33% 0 33.33% 0);
+  }
+  70%,
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes fold-open-top {
+  0%,
+  12% {
+    transform: rotateX(-180deg);
+    opacity: 1;
+  }
+  65% {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+  80%,
+  100% {
+    transform: rotateX(0deg);
+    opacity: 0;
+  }
+}
+@keyframes fold-open-bottom {
+  0%,
+  12% {
+    transform: rotateX(180deg);
+    opacity: 1;
+  }
+  65% {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+  80%,
+  100% {
+    transform: rotateX(0deg);
+    opacity: 0;
+  }
+}
+@keyframes note-ink-in {
+  0%,
+  72% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
