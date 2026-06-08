@@ -51,8 +51,115 @@ npm run preview  # serve the built dist/ locally
 ```
 
 The build inlines all JS/CSS into a single **`dist/index.html`**. You can double-click it
-(`file://`), email it, drop it on a USB stick, or host it on any static host (e.g. GitHub Pages) —
-no server required.
+(`file://`), email it, drop it on a USB stick, or host it anywhere — no server required. Asset paths
+are relative (`base: './'` in `vite.config.ts`), so it also works from a subpath (e.g.
+`username.github.io/PuzzleBox/`).
+
+## Deploying
+
+For every host below the recipe is the same: **build command `npm run build`**, **output/publish
+directory `dist`**. Because the output is one self-contained file, the absolute simplest option is to
+take **`dist/index.html`** and drop it wherever you serve static files.
+
+### Vercel
+
+- **Dashboard:** import the repo → Framework Preset **Vite** → Build Command `npm run build` →
+  Output Directory `dist` → Deploy.
+- **CLI:**
+  ```bash
+  npm i -g vercel
+  npm run build
+  vercel deploy --prebuilt        # or: vercel  (and let it build)
+  ```
+- Optional `vercel.json` to pin settings:
+  ```json
+  {
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist"
+  }
+  ```
+
+### Netlify
+
+- **Drag-and-drop:** run `npm run build`, then drag the **`dist`** folder (or just
+  `dist/index.html`) onto <https://app.netlify.com/drop>.
+- **Git/CLI:** connect the repo, or:
+  ```bash
+  npm i -g netlify-cli
+  npm run build
+  netlify deploy --prod --dir=dist
+  ```
+- Optional `netlify.toml`:
+  ```toml
+  [build]
+    command = "npm run build"
+    publish = "dist"
+  ```
+
+### GitHub Pages
+
+Commit this workflow as `.github/workflows/deploy.yml`, push to `main`, then in the repo go to
+**Settings → Pages → Build and deployment → Source: GitHub Actions**.
+
+```yaml
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+Your site appears at `https://<user>.github.io/<repo>/`. The relative `base` already handles the
+`/<repo>/` subpath, so no config change is needed.
+
+### Cloudflare Pages
+
+Create a Pages project from the repo with **Build command `npm run build`** and **Build output
+directory `dist`**. (Framework preset: Vite, or "None".)
+
+### Surge.sh
+
+```bash
+npm i -g surge
+npm run build
+surge dist
+```
+
+### Any other static host
+
+Render, Firebase Hosting, GitLab Pages, Amazon S3 + CloudFront, nginx/Apache, etc. all work the same
+way: run `npm run build` and serve the contents of **`dist/`** (or just `dist/index.html`) as static
+files.
 
 ## Tests
 
